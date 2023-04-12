@@ -5,6 +5,7 @@ ordinary differential equation (ODE) to be solved by NGspice. Considered ODEs
 are defined in this general form.
 
 $$\dot{x}=Ax+Bu+f(x,u)$$
+
 $$y=Cx+Du+g(x,u)$$
 
 where 
