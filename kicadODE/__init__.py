@@ -398,7 +398,7 @@ def _generate_sym(data):
     lines = []
 
     lines += [ f"(kicad_symbol_lib (version 20220914) (generator kicadODE)" ]
-    lines += [ f"  (symbol \"{name}\" (in_bom yes) (on_board yes)" ]
+    lines += [ f"  (symbol \"{name}\" (in_bom no) (on_board no)" ]
     lines += [ f"    (property \"Reference\" \"LTI\" (at 0 {y_start+ref_dist:.4f} 0)" ]
     lines += [ f"      (effects (font (size {font_size} {font_size})))" ]
     lines += [ f"    )" ]
@@ -576,6 +576,9 @@ def generate(data):
     if "int_gain" not in data:
         data["int_gain"] = 1.0
 
+    if "generate_sym" not in data:
+        data["generate_sym"] = True
+
     data['n'] = n
     data['m'] = m
     data['r'] = r
@@ -594,6 +597,7 @@ def generate(data):
     if result < 0:
         return result
 
-    result = _generate_sym(data)
+    if data["generate_sym"]:
+        result = _generate_sym(data)
 
     return result
