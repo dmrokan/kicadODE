@@ -69,25 +69,37 @@ def _generate_integrators(data, lines):
     xdot_nodes = []
     x_nodes = []
 
+    def _check_A(i):
+        eps = data["eps"]
+        A = data['A']
+
+        for j in range(n):
+            Aij = A[i][j]
+
+            if abs(Aij) > eps:
+                return True
+
+        return False
+
     for i in range(n):
-        eint_id = _generate_id(data, "EINT_ID")
         xdot_id = _generate_id(data, "NODE_ID")
-        np_id = _generate_id(data, "NODE_ID")
         x_id = _generate_id(data, "NODE_ID")
 
-        line = f"AINT{eint_id}\t{xdot_id} {x_id} EINT{eint_id}"
-        lines += [ line ]
+        if _check_A(i):
+            eint_id = _generate_id(data, "EINT_ID")
+            line = f"AINT{eint_id}\t{xdot_id} {x_id} EINT{eint_id}"
+            lines += [ line ]
 
-        line = f".MODEL EINT{eint_id} INT("
-        line += f"in_offset={in_offset} "
-        line += f"gain={int_gain} "
-        line += f"out_lower_limit={out_lower_limit} "
-        line += f"out_upper_limit={out_upper_limit} "
-        line += f"limit_range={limit_range} "
-        line += f"out_ic={float(out_ic[i])}"
-        line += ")"
+            line = f".MODEL EINT{eint_id} INT("
+            line += f"in_offset={in_offset} "
+            line += f"gain={int_gain} "
+            line += f"out_lower_limit={out_lower_limit} "
+            line += f"out_upper_limit={out_upper_limit} "
+            line += f"limit_range={limit_range} "
+            line += f"out_ic={float(out_ic[i])}"
+            line += ")"
 
-        lines += [ line ]
+            lines += [ line ]
 
         xdot_nodes += [ xdot_id ]
         x_nodes += [ x_id ]
@@ -399,7 +411,7 @@ def _generate_sym(data):
 
     lines += [ f"(kicad_symbol_lib (version 20220914) (generator kicadODE)" ]
     lines += [ f"  (symbol \"{name}\" (in_bom no) (on_board no)" ]
-    lines += [ f"    (property \"Reference\" \"LTI\" (at 0 {y_start+ref_dist:.4f} 0)" ]
+    lines += [ f"    (property \"Reference\" \"ODE\" (at 0 {y_start+ref_dist:.4f} 0)" ]
     lines += [ f"      (effects (font (size {font_size} {font_size})))" ]
     lines += [ f"    )" ]
     lines += [ f"    (symbol \"{name}_0_1\"" ]
@@ -579,6 +591,9 @@ def generate(data):
     if "generate_sym" not in data:
         data["generate_sym"] = True
 
+    if "eps" not in data:
+        data["eps"] = 1e-9
+
     data['n'] = n
     data['m'] = m
     data['r'] = r
@@ -590,7 +605,6 @@ def generate(data):
     data["GND_ID"] = _generate_id(data, "NODE_ID")
     data["NONLIN_E_ID"] = 1
     data["NONLIN_E_OUT_ID"] = 1
-    data["eps"] = 1e-9
 
     result = _generate_lib(data)
 
